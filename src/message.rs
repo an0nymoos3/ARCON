@@ -1,5 +1,3 @@
-use std::borrow::Borrow;
-
 const MAX_SIZE: i32 = 4096;
 const PACKET_PADDING: i32 = 10; // See Valve's documentaion under "Packet Size"
 
@@ -54,9 +52,25 @@ impl Packet {
         bytes.extend_from_slice(&self.size.to_le_bytes());
         bytes.extend_from_slice(&self.id.to_le_bytes());
         bytes.extend_from_slice(&self.packet_type.to_le_bytes());
-        bytes.extend_from_slice(&self.body.as_bytes());
+        bytes.extend_from_slice(self.body.as_bytes());
         bytes.extend_from_slice(&[0, 0]); // Add empty terminating string.
 
         bytes
+    }
+
+    /// Basically the reverse of encode. Takes raw data in the form of a vec of bytes, converts it
+    /// back into a Packet struct.
+    pub fn decode(bytes: Vec<u8>) -> AResult {
+        let size: i32 = i32::from_le_bytes(bytes[0..4].try_into().unwrap());
+        let id: i32 = i32::from_le_bytes(bytes[4..8].try_into().unwrap());
+        let packet_type: i32 = i32::from_le_bytes(bytes[8..12].try_into().unwrap());
+        let body: String = String::from_utf8(bytes[12..].to_vec()).unwrap();
+
+        AResult::Ok(Packet {
+            size,
+            id,
+            packet_type,
+            body,
+        })
     }
 }
