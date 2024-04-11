@@ -6,7 +6,7 @@ use tokio::{
 use crate::message::{AError, AResult, Packet, PacketType};
 
 /// Represents a connection to a server. Makes it easier to send and recieve requests.
-struct Connection {
+pub struct Connection {
     conn: TcpStream,
 }
 
@@ -15,7 +15,7 @@ impl Connection {
     pub async fn new(ip: &str, port: &str) -> Result<Self, String> {
         match TcpStream::connect(format!("{ip}:{port}")).await {
             Ok(stream) => Ok(Self { conn: stream }),
-            Err(e) => return Err(e.to_string()),
+            Err(e) => Err(e.to_string()),
         }
     }
 

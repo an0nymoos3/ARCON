@@ -37,6 +37,10 @@ impl Packet {
             _ => 2, // Other 2 options both have value 2
         };
 
+        if size > MAX_SIZE {
+            panic!("PACKET TOO LARGE!")
+        }
+
         Self {
             size,
             id,
