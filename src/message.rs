@@ -64,6 +64,11 @@ impl Packet {
     /// Basically the reverse of encode. Takes raw data in the form of a vec of bytes, converts it
     /// back into a Packet struct.
     pub fn decode(bytes: Vec<u8>) -> Result<Packet> {
+        if bytes.len() < 12 {
+            return Err(anyhow!(
+                "decode() recieved too few bytes! Must be at least 12."
+            ));
+        }
         let size: i32 = i32::from_le_bytes(bytes[0..4].try_into()?);
         let id: i32 = i32::from_le_bytes(bytes[4..8].try_into()?);
         let packet_type: i32 = i32::from_le_bytes(bytes[8..12].try_into()?);
