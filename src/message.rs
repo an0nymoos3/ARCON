@@ -1,4 +1,5 @@
 use anyhow::{anyhow, Result};
+use rand::{rngs::StdRng, Rng, SeedableRng};
 
 const MAX_SIZE: i32 = 4096;
 const PACKET_PADDING: i32 = 10; // See Valve's documentaion under "Packet Size"
@@ -16,7 +17,7 @@ pub enum PacketType {
 /// Rust representation of a packet.
 pub struct Packet {
     size: i32,
-    id: i32,
+    pub id: i32,
     packet_type: i32,
     pub body: String,
 }
@@ -24,14 +25,17 @@ pub struct Packet {
 impl Packet {
     /// Construct a new Packet to send to server.
     pub fn new(p_type: PacketType, body: &str) -> Result<Self> {
-        let size: i32 = body.len() as i32 + PACKET_PADDING;
-        let id = 1;
+        let size: i32 = body.len() as i32 + PACKET_PADDING; // Calculate packet size
+        let id: i32 = StdRng::from_entropy().gen(); // Generate a random id
+
+        // Convert p_type to packet type number.
         let packet_type: i32 = match p_type {
             PacketType::Auth => 3,
             PacketType::ResponseValue => 0,
             _ => 2, // Other 2 options both have value 2
         };
 
+        // Make sure request isn't too big.
         if size > MAX_SIZE {
             return Err(anyhow!("Packet size exceeds MAX_SIZE! (4096)"));
         }
