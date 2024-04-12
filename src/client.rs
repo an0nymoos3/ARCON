@@ -32,11 +32,18 @@ impl Connection {
         Ok(())
     }
 
-    /// Send message to RCON server.
-    pub async fn send(&mut self, message: Packet) -> Result<Packet> {
-        let payload = message.encode();
+    /// Public facing method for easier sending and receiving of commands, with just strings.
+    pub async fn send_command(&mut self, command: &str) -> Result<String> {
+        let packet: Packet = Packet::new(PacketType::Execcommand, command)?;
+        let response: Packet = self.send(packet).await?;
+        Ok(response.body)
+    }
 
-        self.conn.write_all(&payload).await?;
+    /// Send message to RCON server.
+    async fn send(&mut self, message: Packet) -> Result<Packet> {
+        let packet_bytes = message.encode();
+
+        self.conn.write_all(&packet_bytes).await?;
 
         let mut response: Vec<u8> = Vec::new();
 
@@ -46,5 +53,14 @@ impl Connection {
         }
 
         Packet::decode(response)
+    }
+}
+
+// Using [tokio::main] to allow drop() to be asynchronous.
+impl Drop for Connection {
+    #[tokio::main]
+    async fn drop(&mut self) {
+        let _ = self.disconnect().await; // TODO: Maybe look into somehow signalling if disconnect
+                                         // failed.
     }
 }

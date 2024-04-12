@@ -4,6 +4,8 @@ const MAX_SIZE: i32 = 4096;
 const PACKET_PADDING: i32 = 10; // See Valve's documentaion under "Packet Size"
 
 /// Packet types as defined by valve.
+/// Currently allowing dead_code, might use the remaining PacketTypes in the future.
+#[allow(dead_code)]
 pub enum PacketType {
     Auth,
     ResponseValue,
@@ -16,7 +18,7 @@ pub struct Packet {
     size: i32,
     id: i32,
     packet_type: i32,
-    body: String,
+    pub body: String,
 }
 
 impl Packet {
