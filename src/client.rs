@@ -27,7 +27,7 @@ impl Client {
     /// Authenticate Client against server.
     pub async fn authenticate(&mut self, server_password: &str) -> Result<String> {
         let packet: Packet = Packet::new(PacketType::Auth, server_password)?;
-        let response: Packet = timeout(self.timeout, self.send(packet)).await??;
+        let response: Packet = timeout(self.timeout, async { self.send(packet).await }).await??;
         Ok(response.body)
     }
 
@@ -46,7 +46,7 @@ impl Client {
     /// Public facing method for easier sending and receiving of commands, with just strings.
     pub async fn send_command(&mut self, command: &str) -> Result<String> {
         let packet: Packet = Packet::new(PacketType::Execcommand, command)?;
-        let response: Packet = timeout(self.timeout, self.send(packet)).await??;
+        let response: Packet = timeout(self.timeout, async { self.send(packet).await }).await??;
         Ok(response.body)
     }
 
@@ -60,9 +60,7 @@ impl Client {
         let mut response: Vec<u8> = Vec::new();
 
         // For some reason clippy wants me to explicitly check for error instead of propagating.
-        if let Err(e) = self.conn.read(&mut response).await {
-            return Err(anyhow!(e));
-        }
+        let _bytes_read: usize = self.conn.read(&mut response).await?;
         let recv_packet: Packet = Packet::decode(response)?;
 
         // Make sure server responds to correct packet.
