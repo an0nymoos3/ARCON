@@ -75,10 +75,10 @@ impl Client {
 }
 
 // Using [tokio::main] to allow drop() to be asynchronous.
-/*impl Drop for Client {
+impl Drop for Client {
     #[tokio::main]
     async fn drop(&mut self) {
         let _ = self.disconnect().await; // TODO: Maybe look into somehow signalling if disconnect
                                          // failed.
     }
-}*/
+}
