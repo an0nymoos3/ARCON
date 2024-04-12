@@ -27,7 +27,7 @@ impl Client {
     /// Authenticate Client against server.
     pub async fn authenticate(&mut self, server_password: &str) -> Result<String> {
         let packet: Packet = Packet::new(PacketType::Auth, server_password)?;
-        let response: Packet = timeout(self.timeout, async { self.send(packet).await }).await??;
+        let response: Packet = self.send(packet).await?;
         Ok(response.body)
     }
 
@@ -46,7 +46,7 @@ impl Client {
     /// Public facing method for easier sending and receiving of commands, with just strings.
     pub async fn send_command(&mut self, command: &str) -> Result<String> {
         let packet: Packet = Packet::new(PacketType::Execcommand, command)?;
-        let response: Packet = timeout(self.timeout, async { self.send(packet).await }).await??;
+        let response: Packet = self.send(packet).await?;
         Ok(response.body)
     }
 
