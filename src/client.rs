@@ -24,7 +24,7 @@ impl Client {
         }
     }
 
-    /// Establish connection to RCON server.
+    /// Authenticate Client against server.
     pub async fn authenticate(&mut self, server_password: &str) -> Result<String> {
         let packet: Packet = Packet::new(PacketType::Auth, server_password)?;
         let response: Packet = timeout(self.timeout, self.send(packet)).await??;
